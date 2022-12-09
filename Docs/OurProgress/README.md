@@ -8,6 +8,7 @@
     - [NVDLA macro placement using Circuit Training](#circuit-training-baseline-result-on-our-nvdla-nangate45_68)
   - [Pinned questions](#pinned-to-bottom-question-list)
 
+
 ## **Introduction**
 [MacroPlacement](../../) is an open, transparent effort to provide a public, baseline implementation of [Google Brain’s Circuit Training](https://github.com/google-research/circuit_training) (Morpheus) deep RL-based placement method.  In this repo,  we aim to achieve the following.  
 - We want to enable anyone to perform RL-based macro placement on their own design, starting from design RTL files.
@@ -527,6 +528,7 @@ We currently use the physical synthesis tool **Cadence Genus iSpatial** to obtai
 **August 20:** <span style="color:blue">Matching the area utilization</span>. We revisited the area utilization of Our Ariane133 and realized that it (51%) is lower than that of Google’s Ariane (68%). So that this would not devalue our study, we created a second variant,  “**Our Ariane133-NanGate45_68**”, which matches the area utilization of Google’s Ariane. Results are as given below.
   
 ### **Circuit Training Baseline Result on “Our Ariane133-NanGate45**<span style="color:red">**_68**</span>**".**
+  
 <a id="Ariane133_68_CT"></a>  
 <table>
 <thead>
@@ -1199,16 +1201,16 @@ The following table and screenshots show results for (max_x, max_y), where max_x
 <a id="Question3"></a>
 **<span style="color:blue">Question 3.</span>** Is a testcase such as Ariane-133 “probative”, or do we need better testcases?
 
-*A preliminary exercise has examined Innovus P&R outcomes when the Circuit Training macro placement locations for Our Ariane133-NanGate45_68 are **randomly shuffled**. The results for four seed values used in the shuffle, and for the original Circuit Training result, are as follows.*
+*A preliminary exercise has examined Innovus P&R outcomes when the Circuit Training macro placement locations for Our Ariane133-NanGate45_68 are **randomly shuffled**. The results for four seed values used in the shuffle, and for the original Circuit Training result, are as follows.* (We have extended this experiment [here](#Question3ext).)
   
 <table>
 <thead>
   <tr>
     <th>Metric</th>
-    <th>CT_Shuffle_1</th>
-    <th>CT_Shuffle_2</th>
-    <th>CT_Shuffle_3</th>
-    <th>CT_Shuffle_4</th>
+    <th>Shuffle-1</th>
+    <th>Shuffle-2</th>
+    <th>Shuffle-3</th>
+    <th>Shuffle-4</th>
     <th>CT_Result</th>
   </tr>
 </thead>
@@ -1777,7 +1779,7 @@ At some point during the past weeks, we realized that this would also be a poten
 </tbody>
 </table>
 
-Ariane 68%:
+**Ariane 68%:**  
 <p align="center">
 <img width="300" src="./images/image8.png" alg="Ariane133_68_CT_CMP_Place">
 <img width="300" src="./images/image2.png" alg="Ariane133_68_CT_CMP_Route">
@@ -1856,6 +1858,7 @@ The following table and screenshots show the CT result.
 </p>
 
 **September 18:**
+<a id="September18"></a>
 - To address [Question 8](#Question8), we have performed a sweep of target clock period (TCP) constraint for Ariane133-68 in NG45. Experiments above were performed with a loose TCP of 4.0ns. According to our studies, the “hockey stick” ends at a TCP of 1.3ns, so we have generated netlists and run CT for TCP values of 1.3ns and 1.5ns. The results are shown below (post-physical synthesis summary results with TCP values of 4.0ns, 1.5ns, 1.3ns; CT + Innovus P&R results for 1.5ns, 1.3ns). We see that the wirelength numbers are worse for CT results compared to the CMP result, but the timing numbers for CT are better than CMP.
   - The following table shows the post-physical synthesis results of Ariane133-68-NG45 for different TCPs when the macro placement is generated using CMP.
 
@@ -2475,7 +2478,6 @@ We shared the Ariane133-NG45-68% protobuf netlist and clustered netlist with Goo
 </table>
 
   
-<p align="center">
 <table>
 <thead>
   <tr>
@@ -2507,7 +2509,6 @@ We shared the Ariane133-NG45-68% protobuf netlist and clustered netlist with Goo
   </tr>
 </tbody>
 </table>
-</p>
   
 <p align="center">
 <img width="300" src="./images/image48.png" alg="ariane133_68_ct_google_place">
@@ -2515,7 +2516,7 @@ We shared the Ariane133-NG45-68% protobuf netlist and clustered netlist with Goo
 </p>
 
 
-**October 8:**  
+**October 9:**  
 
 <a id="Question9"></a>
 **<span style="color:blue">Question 9.</span>** Are CT results stable? If not, how much does the outcome vary?  
@@ -2681,7 +2682,7 @@ We see from the results in the [CT repo](https://github.com/google-research/circ
     <td>5059042</td>
   </tr>
   <tr>
-    <td>postSynt_WS(ns)</td>
+    <td>postSynth_WS(ns)</td>
     <td>-0.764</td>
     <td>-0.764</td>
     <td>-0.764</td>
@@ -2726,7 +2727,7 @@ We see from the results in the [CT repo](https://github.com/google-research/circ
     <td>-0.083</td>
   </tr>
   <tr>
-    <td>postSynt_TNS(ns)</td>
+    <td>postSynth_TNS(ns)</td>
     <td>-366.528</td>
     <td>-592.301</td>
     <td>-501.314</td>
@@ -3039,7 +3040,7 @@ We further ran coordinate descent (CD) placer on the CT outcomes and the followi
     <td>4969937</td>
   </tr>
   <tr>
-    <td>postSynt_WS (ns)</td>
+    <td>postSynth_WS (ns)</td>
     <td>-0.764</td>
     <td>-0.764</td>
     <td>-0.764</td>
@@ -3084,7 +3085,7 @@ We further ran coordinate descent (CD) placer on the CT outcomes and the followi
     <td>-0.137</td>
   </tr>
   <tr>
-    <td>postSynt_TNS (ns)</td>
+    <td>postSynth_TNS (ns)</td>
     <td>-351.045</td>
     <td>-331.782</td>
     <td>-406.717</td>
@@ -3572,7 +3573,7 @@ We have collected macro placement generated by CT runs for Ariane133-NG45-68%-1.
     <td>0.1045</td>
   </tr>
   <tr>
-    <td>postSynt_WS (ns)</td>
+    <td>postSynth_WS (ns)</td>
     <td>-0.764</td>
     <td>-0.764</td>
     <td>-0.764</td>
@@ -3662,7 +3663,7 @@ We have collected macro placement generated by CT runs for Ariane133-NG45-68%-1.
     <td>-0.076</td>
   </tr>
   <tr>
-    <td>postSynt_TNS (ns)</td>
+    <td>postSynth_TNS (ns)</td>
     <td>-326.535</td>
     <td>-382.684</td>
     <td>-477.484</td>
@@ -4033,14 +4034,14 @@ In the following table we report the Kendall rank correlation coefficient for pr
 
 
 <a id="MemPoolGroup_NG45_68"></a>
-**Circuit Training Baseline Result on “Our MemPool_Group-NanGate45_68”.**
+**Circuit Training Baseline Result on “Our MemPool_Group-NanGate45_68”.**  
 We have trained CT to generate a macro placement for the [MemPool Group design](../../Flows/NanGate45/mempool_group/). For this experiment we use the NanGate45 enablement; the initial canvas size is generated by setting utilization to 68%. We use the default hyperparameters used for Ariane to train CT for bp_quad design. The number of hard macros in MemPool Group is 324, so we update [max_sequence_length](https://github.com/google-research/circuit_training/blob/6a76e327a70b5f0c9e3291b57c085688386da04e/circuit_training/learning/ppo_collect.py#L53) to 325 in [ppo_collect.py](https://github.com/google-research/circuit_training/blob/6a76e327a70b5f0c9e3291b57c085688386da04e/circuit_training/learning/ppo_collect.py#L53)  and [sequence_length](https://github.com/google-research/circuit_training/blob/6a76e327a70b5f0c9e3291b57c085688386da04e/circuit_training/learning/train_ppo.py#L57) to 325 in [train_ppo.py](https://github.com/google-research/circuit_training/blob/6a76e327a70b5f0c9e3291b57c085688386da04e/circuit_training/learning/train_ppo.py#L57).
 
   
 <table>
 <thead>
   <tr>
-    <th colspan="10">MemPool group-NG45-68%-4ns CT result (Flow2. Final DRC Count: 19367) (<a href="https://tensorboard.dev/experiment/32FLUvjVSjaQ0wYO1m9vJQ/#scalars">Link</a> to Tensorboard)</th>
+    <th colspan="10"><p align="center">MemPool group-NG45-68%-4ns CT result (Flow2. Final DRC Count: 19367) (<a href="https://tensorboard.dev/experiment/32FLUvjVSjaQ0wYO1m9vJQ/#scalars">Link</a> to Tensorboard)</p></th>
   </tr>
 </thead>
 <tbody>
@@ -4127,7 +4128,7 @@ We have trained CT to generate a macro placement for the [MemPool Group design](
 <table>
 <thead>
   <tr>
-    <th colspan="10">MemPool group-NG45-68%-4ns CMP result (Flow2. Final DRC Count: 26)</th>
+    <th colspan="10"><p align="center">MemPool group-NG45-68%-4ns CMP result (Flow2. Final DRC Count: 26)</p></th>
   </tr>
 </thead>
 <tbody>
@@ -4211,8 +4212,837 @@ We have trained CT to generate a macro placement for the [MemPool Group design](
 <img width="300" src="./images/image53.png" alg="MemPool_Group_CMP_Route">
 </p>
 
-## **Pinned (to bottom) question list:**
+**November 25:**  
+<a id="November25"></a>
+We document two variant Evaluation Flows (taking macro placements through Innovus place-and-route) that we use, in this [Evaluation Flow document](https://docs.google.com/document/d/1xDGFSYxIE0AKsGAI3ccLz1EX3bLHOvDtwl3983G5kYk/edit?usp=sharing). Posted results up to now have been obtained with Evaluation Flow 2. The [Evaluation Flow document](https://docs.google.com/document/d/1xDGFSYxIE0AKsGAI3ccLz1EX3bLHOvDtwl3983G5kYk/edit?usp=sharing) shows that results and conclusions are nearly identical between Evaluation Flow 1 and Evaluation Flow 2. However, going forward we will report our macro placement assessments using Evaluation Flow 1.
+<p align="center">
+<img width="600" src="./images/EvaluationFlows.png" alg="EvaluationFlows">
+</p>
 
+**CT Results for Commercial Enablement**  
+We have run CT to generate macro placement for Ariane133, BlackParrot and MemPool Group designs on GLOBALFOUNDRIES 12nm (GF12) enablement. The following tables present the normalized design metrics. Core area, standard cell area and macro area are normalized with respect to the core area. Total power is normalized w.r.t. the reported preCTS total power when CMP is used. Similarly, we normalize the wirelength and congestion based on the reported preCTS wirelength and congestion when CMP is used. The timing numbers are normalized w.r.t. the target clock period.
+
+- The following table and screenshots provide details of Ariane133 GF12 implementation when CMP is used to generate the initial macro placement.  
+<table>
+<thead>
+  <tr>
+    <th colspan="10"><p align="center">Ariane133-GF12-68% CMP</p></th>
+  </tr>
+</thead>
+<tbody>
+  <tr>
+    <td>Physical Design Stage</td>
+    <td>Core Area</td>
+    <td>Standard Cell Area</td>
+    <td>Macro Area</td>
+    <td>Total Power</td>
+    <td>Wirelength</td>
+    <td>WS</td>
+    <td>TNS</td>
+    <td>Congestion <br>(H)</td>
+    <td>Congestion (V)</td>
+  </tr>
+  <tr>
+    <td>preCTS</td>
+    <td>1</td>
+    <td>0.137</td>
+    <td>0.555</td>
+    <td>1.0000</td>
+    <td>1.0000</td>
+    <td>-0.130</td>
+    <td>-259.985</td>
+    <td>0.00</td>
+    <td>1.00</td>
+  </tr>
+  <tr>
+    <td>postCTS</td>
+    <td>1</td>
+    <td>0.139</td>
+    <td>0.555</td>
+    <td>1.1442</td>
+    <td>1.0112</td>
+    <td>-0.145</td>
+    <td>-114.783</td>
+    <td>0.00</td>
+    <td>1.00</td>
+  </tr>
+  <tr>
+    <td>postRoute</td>
+    <td>1</td>
+    <td>0.139</td>
+    <td>0.555</td>
+    <td>1.1356</td>
+    <td>1.0432</td>
+    <td>-0.185</td>
+    <td>-142.688</td>
+    <td></td>
+    <td></td>
+  </tr>
+  <tr>
+    <td>postRouteOpt</td>
+    <td>1</td>
+    <td>0.139</td>
+    <td>0.555</td>
+    <td>1.1352</td>
+    <td>1.0443</td>
+    <td>-0.159</td>
+    <td>-142.274</td>
+    <td></td>
+    <td></td>
+  </tr>
+</tbody>
+</table>  
+
+<p align="center">
+<img width="300" src="./images/Ariane133_GF12_CMP_Place.png" alg="Ariane133_GF12_CMP_Place">
+<img width="300" src="./images/Ariane133_GF12_CMP_Route.png" alg="Ariane133_GF12_CMP_Route">
+</p>
+
+- The following table and screenshots provide details of Ariane133 GF12 implementation when CT is used to generate the initial macro placement.  
+<table>
+<thead>
+  <tr>
+    <th colspan="10"><p align="center">Ariane133-GF12-68% CT (<a href="https://tensorboard.dev/experiment/PFZd6uMpS6yjbqZ3GqRcDA/">Link</a> to Tensorboard)</p></th>
+  </tr>
+</thead>
+<tbody>
+  <tr>
+    <td>Physical Design Stage</td>
+    <td>Core Area</td>
+    <td>Standard Cell Area</td>
+    <td>Macro Area</td>
+    <td>Total Power</td>
+    <td>Wirelength</td>
+    <td>WS</td>
+    <td>TNS</td>
+    <td>Congestion (H)</td>
+    <td>Congestion (V)</td>
+  </tr>
+  <tr>
+    <td>preCTS</td>
+    <td>1</td>
+    <td>0.138</td>
+    <td>0.555</td>
+    <td>1.0120</td>
+    <td>1.1652</td>
+    <td>-0.130</td>
+    <td>-239.531</td>
+    <td>0.00</td>
+    <td>0.50</td>
+  </tr>
+  <tr>
+    <td>postCTS</td>
+    <td>1</td>
+    <td>0.140</td>
+    <td>0.555</td>
+    <td>1.1623</td>
+    <td>1.1828</td>
+    <td>-0.138</td>
+    <td>-140.220</td>
+    <td>0.00</td>
+    <td>1.00</td>
+  </tr>
+  <tr>
+    <td>postRoute</td>
+    <td>1</td>
+    <td>0.140</td>
+    <td>0.555</td>
+    <td>1.1530</td>
+    <td>1.2151</td>
+    <td>-0.138</td>
+    <td>-145.883</td>
+    <td></td>
+    <td></td>
+  </tr>
+  <tr>
+    <td>postRouteOpt</td>
+    <td>1</td>
+    <td>0.140</td>
+    <td>0.555</td>
+    <td>1.1519</td>
+    <td>1.2161</td>
+    <td>-0.145</td>
+    <td>-115.805</td>
+    <td></td>
+    <td></td>
+  </tr>
+</tbody>
+</table>
+
+<p align="center">
+<img width="300" src="./images/Ariane133_GF12_CT_Place.png" alg="Ariane133_GF12_CT_Place">
+<img width="300" src="./images/Ariane133_GF12_CT_Route.png" alg="Ariane133_GF12_CT_Route">
+</p>
+
+- The following table and screenshots provide details of BlackParrot (Quad Core) GF12 implementation when CMP is used to generate the initial macro placement.  
+<table>
+<thead>
+  <tr>
+    <th colspan="10"><p align="center">BlackParrot-GF12-68% CMP</p></th>
+  </tr>
+</thead>
+<tbody>
+  <tr>
+    <td>Physical Design Stage</td>
+    <td>Core Area</td>
+    <td>Standard Cell Area</td>
+    <td>Macro Area</td>
+    <td>Total Power</td>
+    <td>Wirelength</td>
+    <td>WS</td>
+    <td>TNS</td>
+    <td>Congestion(H)</td>
+    <td>Congestion(V)</td>
+  </tr>
+  <tr>
+    <td>preCTS</td>
+    <td>1</td>
+    <td>0.176</td>
+    <td>0.501</td>
+    <td>1.0000</td>
+    <td>1.0000</td>
+    <td>0.001</td>
+    <td>0.000</td>
+    <td>1.00</td>
+    <td>1.00</td>
+  </tr>
+  <tr>
+    <td>postCTS</td>
+    <td>1</td>
+    <td>0.178</td>
+    <td>0.501</td>
+    <td>1.1526</td>
+    <td>1.0079</td>
+    <td>0.000</td>
+    <td>0.000</td>
+    <td>1.00</td>
+    <td>1.00</td>
+  </tr>
+  <tr>
+    <td>postRoute</td>
+    <td>1</td>
+    <td>0.178</td>
+    <td>0.501</td>
+    <td>1.1436</td>
+    <td>1.0304</td>
+    <td>-0.014</td>
+    <td>-2.629</td>
+    <td></td>
+    <td></td>
+  </tr>
+  <tr>
+    <td>postRouteOpt</td>
+    <td>1</td>
+    <td>0.178</td>
+    <td>0.501</td>
+    <td>1.1437</td>
+    <td>1.0306</td>
+    <td>0.001</td>
+    <td>0.000</td>
+    <td></td>
+    <td></td>
+  </tr>
+</tbody>
+</table>
+
+<p align="center">
+<img width="300" src="./images/BP_Quad_GF12_CMP_Place.png" alg="BP_Quad_GF12_CMP_Place">
+<img width="300" src="./images/BP_Quad_GF12_CMP_Route.png" alg="BP_Quad_GF12_CMP_Route">
+</p>   
+
+- The following table and screenshots provide details of BlackParrot (Quad Core) GF12 implementation when CT is used to generate the initial macro placement.  
+<table>
+<thead>
+  <tr>
+    <th colspan="10"><p align="center">BlackParrot-GF12-68% CT (<a href="https://tensorboard.dev/experiment/6grbdijUQDe5m8KGfOSpnw/">Link</a> to Tensorboard)</p></th>
+  </tr>
+</thead>
+<tbody>
+  <tr>
+    <td>Physical Design Stage</td>
+    <td>Core Area</td>
+    <td>Standard Cell Area</td>
+    <td>Macro Area</td>
+    <td>Total Power</td>
+    <td>Wirelength</td>
+    <td>WS</td>
+    <td>TNS</td>
+    <td>Congestion(H)</td>
+    <td>Congestion(V)</td>
+  </tr>
+  <tr>
+    <td>preCTS</td>
+    <td>1</td>
+    <td>0.178</td>
+    <td>0.501</td>
+    <td>1.1068</td>
+    <td>1.6993</td>
+    <td>0.001</td>
+    <td>0.000</td>
+    <td>3.00</td>
+    <td>2.00</td>
+  </tr>
+  <tr>
+    <td>postCTS</td>
+    <td>1</td>
+    <td>0.179</td>
+    <td>0.501</td>
+    <td>1.2621</td>
+    <td>1.7058</td>
+    <td>0.000</td>
+    <td>0.000</td>
+    <td>2.00</td>
+    <td>2.20</td>
+  </tr>
+  <tr>
+    <td>postRoute</td>
+    <td>1</td>
+    <td>0.179</td>
+    <td>0.501</td>
+    <td>1.2469</td>
+    <td>1.7372</td>
+    <td>-0.028</td>
+    <td>-11.492</td>
+    <td></td>
+    <td></td>
+  </tr>
+  <tr>
+    <td>postRouteOpt</td>
+    <td>1</td>
+    <td>0.179</td>
+    <td>0.501</td>
+    <td>1.2462</td>
+    <td>1.7379</td>
+    <td>0.001</td>
+    <td>0.000</td>
+    <td></td>
+    <td></td>
+  </tr>
+</tbody>
+</table>
+
+<p align="center">
+<img width="300" src="./images/BP_Quad_GF12_CT_Place.png" alg="BP_Quad_GF12_CT_Place">
+<img width="300" src="./images/BP_Quad_GF12_CT_Route.png" alg="BP_Quad_GF12_CT_Route">
+</p>  
+
+- The following table and screenshots provide details of MemPool Group GF12 implementation when CMP is used to generate the initial macro placement.  
+<table>
+<thead>
+  <tr>
+    <th colspan="10"><p align="center">MemPool Group-GF12-68% CMP</p></th>
+  </tr>
+</thead>
+<tbody>
+  <tr>
+    <td>Physical Design Stage</td>
+    <td>Core Area</td>
+    <td>Standard Cell Area</td>
+    <td>Macro Area</td>
+    <td>Total Power</td>
+    <td>Wirelength</td>
+    <td>WS</td>
+    <td>TNS</td>
+    <td>Congestion(H)</td>
+    <td>Congestion(V)</td>
+  </tr>
+  <tr>
+    <td>preCTS</td>
+    <td>1</td>
+    <td>0.415</td>
+    <td>0.308</td>
+    <td>1.0000</td>
+    <td>1.0000</td>
+    <td>-0.154</td>
+    <td>-12479.05</td>
+    <td>1.00</td>
+    <td>1.00</td>
+  </tr>
+  <tr>
+    <td>postCTS</td>
+    <td>1</td>
+    <td>0.406</td>
+    <td>0.308</td>
+    <td>1.0663</td>
+    <td>1.0109</td>
+    <td>-0.134</td>
+    <td>-1828.60</td>
+    <td>1.07</td>
+    <td>1.26</td>
+  </tr>
+  <tr>
+    <td>postRoute</td>
+    <td>1</td>
+    <td>0.406</td>
+    <td>0.308</td>
+    <td>1.0631</td>
+    <td>1.0507</td>
+    <td>-0.213</td>
+    <td>-5882.00</td>
+    <td></td>
+    <td></td>
+  </tr>
+  <tr>
+    <td>postRouteOpt</td>
+    <td>1</td>
+    <td>0.405</td>
+    <td>0.308</td>
+    <td>1.0601</td>
+    <td>1.0521</td>
+    <td>-0.197</td>
+    <td>-1961.25</td>
+    <td></td>
+    <td></td>
+  </tr>
+</tbody>
+</table>
+
+<p align="center">
+<img width="300" src="./images/MemPool_Group_GF12_CMP_Place.png" alg="MemPool_Group_GF12_CMP_Place">
+<img width="300" src="./images/MemPool_Group_GF12_CMP_Route.png" alg="MemPool_Group_GF12_CMP_Route">
+</p>
+
+- The following table and screenshots provide details of MemPool Group GF12 implementation when CMP is used to generate the initial macro placement.  
+<table>
+<thead>
+  <tr>
+    <th colspan="10"><p align="center">MemPool Group-GF12-68% CT (<a href="https://tensorboard.dev/experiment/liqXGb6rSrqpf55G2OH2Fw/">Link</a> to Tensorboard)</p></th>
+  </tr>
+</thead>
+<tbody>
+  <tr>
+    <td>Physical Design Stage</td>
+    <td>Core Area</td>
+    <td>Standard Cell Area</td>
+    <td>Macro Area</td>
+    <td>Total Power</td>
+    <td>Wirelength</td>
+    <td>WS</td>
+    <td>TNS</td>
+    <td>Congestion(H)</td>
+    <td>Congestion(V)</td>
+  </tr>
+  <tr>
+    <td>preCTS</td>
+    <td>1</td>
+    <td>0.419</td>
+    <td>0.308</td>
+    <td>1.1094</td>
+    <td>1.222</td>
+    <td>-0.170</td>
+    <td>-13620.25</td>
+    <td>1</td>
+    <td>1.22</td>
+  </tr>
+  <tr>
+    <td>postCTS</td>
+    <td>1</td>
+    <td>0.414</td>
+    <td>0.308</td>
+    <td>1.1966</td>
+    <td>1.2331</td>
+    <td>-0.179</td>
+    <td>-3615.65</td>
+    <td>1.27</td>
+    <td>1.57</td>
+  </tr>
+  <tr>
+    <td>postRoute</td>
+    <td>1</td>
+    <td>0.414</td>
+    <td>0.308</td>
+    <td>1.1987</td>
+    <td>1.2798</td>
+    <td>-0.178</td>
+    <td>-6350.95</td>
+    <td></td>
+    <td></td>
+  </tr>
+  <tr>
+    <td>postRouteOpt</td>
+    <td>1</td>
+    <td>0.410</td>
+    <td>0.308</td>
+    <td>1.1847</td>
+    <td>1.282</td>
+    <td>-0.195</td>
+    <td>-1849.40</td>
+    <td></td>
+    <td></td>
+  </tr>
+</tbody>
+</table>
+
+<p align="center">
+<img width="300" src="./images/MemPool_Group_GF12_CT_Place.png" alg="MemPool_Group_GF12_CT_Place">
+<img width="300" src="./images/MemPool_Group_GF12_CT_Route.png" alg="MemPool_Group_GF12_CT_Route">
+</p>
+
+**An Observation regarding "Pure Commercial Flow".** 
+<a id="PureCommercialFlow"></a>
+The [Evaluation Flow document](https://docs.google.com/document/d/1xDGFSYxIE0AKsGAI3ccLz1EX3bLHOvDtwl3983G5kYk/edit?usp=sharing) also sheds light on the relative
+strength of a "Pure Commercial Flow", as follows. CT uses the placement information generated by physical synthesis (Genus iSpatial). Observe that if we go straight into Evaluation Flow 1 from physical synthesis (without running CT), this will produce a "pure commercial flow" (i.e., CMP) outcome without any use of 
+Circuit Training. From the data in the [Evaluation Flow document](https://docs.google.com/document/d/1xDGFSYxIE0AKsGAI3ccLz1EX3bLHOvDtwl3983G5kYk/edit?usp=sharing),
+we see that with the "pure commercial flow", CMP macro placements produce similar timing and power numbers compared to CT macro placements. However, the postRouteOpt wirelength of CT macro placements is at least 18% larger than the postRouteOpt wirelength of CMP macro placements.  
+Please note that we report this data as part of our study of Circuit Training. It is not intended to "benchmark" any commercial EDA tool in any sense, and the data should not be interpreted as providing any sort of "benchmarking" comparison or value judgment regarding the commercial tool. 
+
+**November 27:**  
+<a id="Question3ext"></a>
+We have extended the experiment of [Question 3](#Question3) to assess the difficulty of our testcases. As mentioned [here](#Question3), we take the CT-generated macro placement and then randomly swap the same-size macros. We use the [shuffle_macro.tcl](https://github.com/TILOS-AI-Institute/MacroPlacement/blob/651a36626dd778018c5cf867b419e44f64fb103e/Flows/util/shuffle_macro.tcl#L29) script for this experiment. The following items provide  details of the macro shuffling experiments for different testcases.
+
+- **Ariane:**
+The target clock period of the shuffling experiment for Ariane133-NG45-68% shown [here](#Question3) is 4ns, which is very relaxed (see [here](#September18) for clock period sweep results). Hence, we ran the same macro shuffling experiment for a tighter target clock period of 1.3ns. The following table shows the preCTS / postPlaceOpt and postRouteOpt metrics. We shuffled the macros using six different seed values of 111, 222, 333, 444, 555 and 666.
+  - For the shuffled designs, the total power increases by 1.4%, the wirelength increases by 16%, and the runtime increases by 9% on average.
+
+<table>
+<thead>
+  <tr>
+    <th colspan="8"><p align="center">Ariane133-NG45-68%-1.3ns</p></th>
+  </tr>
+</thead>
+<tbody>
+  <tr>
+    <td>Metrics</td>
+    <td>CT</td>
+    <td>Shuffle-111</td>
+    <td>Shuffle-222</td>
+    <td>Shuffle-333</td>
+    <td>Shuffle-444</td>
+    <td>Shuffle-555</td>
+    <td>Shuffle-666</td>
+  </tr>
+  <tr>
+    <td>Core_area (um^2)</td>
+    <td>1814274</td>
+    <td>1814274</td>
+    <td>1814274</td>
+    <td>1814274</td>
+    <td>1814274</td>
+    <td>1814274</td>
+    <td>1814274</td>
+  </tr>
+  <tr>
+    <td>Macro_area (um^2)</td>
+    <td>1018356</td>
+    <td>1018356</td>
+    <td>1018356</td>
+    <td>1018356</td>
+    <td>1018356</td>
+    <td>1018356</td>
+    <td>1018356</td>
+  </tr>
+  <tr>
+    <td>preCTS_std_cell_area (um^2)</td>
+    <td>243264</td>
+    <td>246309</td>
+    <td>243426</td>
+    <td>246181</td>
+    <td>247134</td>
+    <td>243731</td>
+    <td>246412</td>
+  </tr>
+  <tr>
+    <td>postRouteOpt_std_cell_area (um^2)</td>
+    <td>244002</td>
+    <td>250080</td>
+    <td>246325</td>
+    <td>249506</td>
+    <td>249494</td>
+    <td>246242</td>
+    <td>247918</td>
+  </tr>
+  <tr>
+    <td>preCTS_total_power (mw)</td>
+    <td>789.871</td>
+    <td>802.369</td>
+    <td>796.562</td>
+    <td>803.034</td>
+    <td>801.677</td>
+    <td>794.323</td>
+    <td>802.673</td>
+  </tr>
+  <tr>
+    <td>postRouteOpt_total_power (mw)</td>
+    <td>828.747</td>
+    <td>845.726</td>
+    <td>836.735</td>
+    <td>844.61</td>
+    <td>843.227</td>
+    <td>837.434</td>
+    <td>838.833</td>
+  </tr>
+  <tr>
+    <td>preCTS_wirelength (um)</td>
+    <td>4727728</td>
+    <td>5515599</td>
+    <td>5547501</td>
+    <td>5489654</td>
+    <td>5508653</td>
+    <td>5448399</td>
+    <td>5549232</td>
+  </tr>
+  <tr>
+    <td>postRouteOpt_wirelength (um)</td>
+    <td>4893776</td>
+    <td>5690000</td>
+    <td>5712986</td>
+    <td>5667587</td>
+    <td>5687840</td>
+    <td>5628320</td>
+    <td>5724530</td>
+  </tr>
+  <tr>
+    <td>preCTS_WS (ns)</td>
+    <td>-0.091</td>
+    <td>-0.112</td>
+    <td>-0.109</td>
+    <td>-0.141</td>
+    <td>-0.144</td>
+    <td>-0.095</td>
+    <td>-0.151</td>
+  </tr>
+  <tr>
+    <td>postRouteOpt_WS (ns)</td>
+    <td>-0.079</td>
+    <td>-0.091</td>
+    <td>-0.099</td>
+    <td>-0.106</td>
+    <td>-0.157</td>
+    <td>-0.048</td>
+    <td>-0.108</td>
+  </tr>
+  <tr>
+    <td>preCTS_TNS (ns)</td>
+    <td>-110.373</td>
+    <td>-136.145</td>
+    <td>-136.781</td>
+    <td>-197.545</td>
+    <td>-196.557</td>
+    <td>-96.462</td>
+    <td>-210.187</td>
+  </tr>
+  <tr>
+    <td>postRouteOpt_TNS (ns)</td>
+    <td>-25.762</td>
+    <td>-66.855</td>
+    <td>-86.119</td>
+    <td>-81.177</td>
+    <td>-159.035</td>
+    <td>-16.386</td>
+    <td>-75.133</td>
+  </tr>
+  <tr>
+    <td>preCTS_Congestion (H)</td>
+    <td>0.03%</td>
+    <td>0.04%</td>
+    <td>0.05%</td>
+    <td>0.05%</td>
+    <td>0.04%</td>
+    <td>0.04%</td>
+    <td>0.05%</td>
+  </tr>
+  <tr>
+    <td>preCTS_Congestion (V)</td>
+    <td>0.12%</td>
+    <td>0.12%</td>
+    <td>0.15%</td>
+    <td>0.12%</td>
+    <td>0.12%</td>
+    <td>0.10%</td>
+    <td>0.10%</td>
+  </tr>
+  <tr>
+    <td>Runtime (second)</td>
+    <td>3451</td>
+    <td>3786</td>
+    <td>3427</td>
+    <td>3591</td>
+    <td>3748</td>
+    <td>3851</td>
+    <td>3994</td>
+  </tr>
+</tbody>
+</table>
+  
+- **BlackParrot (Quad-Core):**
+We have performed a similar macro shuffling experiment for the BlackParrot (Quad-Core) design. The following table shows the preCTS / postPlaceOpt and postRouteOpt metrics. We shuffled the macros using six different seed values of 111, 222, 333, 444, 555 and 666.  
+  - For the shuffled designs, the total power increases by 6%, the wirelength increases by 33%, and the runtime increases by 16% on average.
+
+<table>
+<thead>
+  <tr>
+    <th colspan="8"><p align="center">BlackParrot (Quad-Core)-NG45-68%-1.3ns (bp_clk)</p></th>
+  </tr>
+</thead>
+<tbody>
+  <tr>
+    <td>Metrics</td>
+    <td>CT</td>
+    <td>Shuffle-111</td>
+    <td>Shuffle-222</td>
+    <td>Shuffle-333</td>
+    <td>Shuffle-444</td>
+    <td>Shuffle-555</td>
+    <td>Shuffle-666</td>
+  </tr>
+  <tr>
+    <td>core_area (um^2)</td>
+    <td>8449457</td>
+    <td>8449457</td>
+    <td>8449457</td>
+    <td>8449457</td>
+    <td>8449457</td>
+    <td>8449457</td>
+    <td>8449457</td>
+  </tr>
+  <tr>
+    <td>macro_area (um^2)</td>
+    <td>3917822</td>
+    <td>3917822</td>
+    <td>3917822</td>
+    <td>3917822</td>
+    <td>3917822</td>
+    <td>3917822</td>
+    <td>3917822</td>
+  </tr>
+  <tr>
+    <td>preCTS_std_cell_area (um^2)</td>
+    <td>1954954</td>
+    <td>1985365</td>
+    <td>1986378</td>
+    <td>1985226</td>
+    <td>1984435</td>
+    <td>1988719</td>
+    <td>1991871</td>
+  </tr>
+  <tr>
+    <td>postRouteOpt_std_cell_area (um^2)</td>
+    <td>1978731</td>
+    <td>2008143</td>
+    <td>2037502</td>
+    <td>2033273</td>
+    <td>2014517</td>
+    <td>2027724</td>
+    <td>2016049</td>
+  </tr>
+  <tr>
+    <td>preCTS_total_power (mw)</td>
+    <td>4329.795</td>
+    <td>4604.961</td>
+    <td>4619.481</td>
+    <td>4608.242</td>
+    <td>4591.569</td>
+    <td>4632.783</td>
+    <td>4620.598</td>
+  </tr>
+  <tr>
+    <td>postRouteOpt_total_power (mw)</td>
+    <td>4685.509</td>
+    <td>4959.629</td>
+    <td>5004.988</td>
+    <td>4998.899</td>
+    <td>4959.435</td>
+    <td>5005.635</td>
+    <td>4977.157</td>
+  </tr>
+  <tr>
+    <td>preCTS_wirelength (um)</td>
+    <td>39101445</td>
+    <td>51131110</td>
+    <td>51444279</td>
+    <td>52030185</td>
+    <td>52035717</td>
+    <td>53176682</td>
+    <td>51997133</td>
+  </tr>
+  <tr>
+    <td>postRouteOpt_wirelength (um)</td>
+    <td>40467467</td>
+    <td>53098209</td>
+    <td>53425737</td>
+    <td>54070974</td>
+    <td>54030437</td>
+    <td>55365255</td>
+    <td>54171082</td>
+  </tr>
+  <tr>
+    <td>preCTS_WS (ns)</td>
+    <td>-0.220</td>
+    <td>-0.228</td>
+    <td>-0.193</td>
+    <td>-0.205</td>
+    <td>-0.199</td>
+    <td>-0.217</td>
+    <td>-0.222</td>
+  </tr>
+  <tr>
+    <td>postRouteOpt_WS (ns)</td>
+    <td>-0.260</td>
+    <td>-0.179</td>
+    <td>-0.305</td>
+    <td>-0.342</td>
+    <td>-0.211</td>
+    <td>-0.289</td>
+    <td>-0.251</td>
+  </tr>
+  <tr>
+    <td>preCTS_TNS (ns)</td>
+    <td>-1385.900</td>
+    <td>-1105.900</td>
+    <td>-826.103</td>
+    <td>-912.903</td>
+    <td>-1116.400</td>
+    <td>-944.540</td>
+    <td>-1065.400</td>
+  </tr>
+  <tr>
+    <td>postRouteOpt_TNS (ns)</td>
+    <td>-3657.000</td>
+    <td>-835.927</td>
+    <td>-6542.400</td>
+    <td>-8738.100</td>
+    <td>-1816.000</td>
+    <td>-3548.600</td>
+    <td>-1322.200</td>
+  </tr>
+  <tr>
+    <td>preCTS_Congestion (H)</td>
+    <td>0.21%</td>
+    <td>0.52%</td>
+    <td>0.71%</td>
+    <td>0.64%</td>
+    <td>0.62%</td>
+    <td>0.53%</td>
+    <td>0.66%</td>
+  </tr>
+  <tr>
+    <td>preCTS_Congestion (V)</td>
+    <td>0.29%</td>
+    <td>0.54%</td>
+    <td>0.44%</td>
+    <td>0.50%</td>
+    <td>0.45%</td>
+    <td>0.68%</td>
+    <td>0.57%</td>
+  </tr>
+  <tr>
+    <td>Runtime (second)</td>
+    <td>22367</td>
+    <td>26089</td>
+    <td>25940</td>
+    <td>25293</td>
+    <td>24745</td>
+    <td>32431</td>
+    <td>31591</td>
+  </tr>
+</tbody>
+</table>
+
+- **MemPool Group:**
+We have tried a similar macro shuffling experiment for MemPool Group, but none of our runs completed (i.e., flow failure).
+
+## **Pinned (to bottom) question list:**
+  
 **<span style="color:blue">[Question 1](#Question1).</span>** How does having an initial set of placement locations (from physical synthesis) affect the (relative) quality of the CT result?  
 **<span style="color:blue">[Question 2](#Question2).</span>** How does utilization affect the (relative) performance of CT?  
 **<span style="color:blue">[Question 3](#Question3).</span>** Is a testcase such as Ariane-133 “probative”, or do we need better testcases?  

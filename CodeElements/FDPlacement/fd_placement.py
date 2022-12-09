@@ -394,12 +394,12 @@ class FDPlacement:
         x_dist = self.objects[u].x - self.objects[v].x
         y_dist = self.objects[u].y - self.objects[v].y
         dist = sqrt(x_dist * x_dist + y_dist * y_dist)
-        if (dist <= 1e-5):
-            return 1e5, 1e5
+        
+        if (dist <= 1e-10):
+            return sqrt(self.repulsive_factor), sqrt(self.repulsive_factor)
         else:
-            f = self.func_r(dist)
-            f_x = x_dist / dist * f
-            f_y = y_dist / dist * f
+            f_x = self.repulsive_factor * x_dist / dist
+            f_y = self.repulsive_factor * y_dist / dist
             return f_x, f_y
 
     # Pull the objects to the nearest center of the gridcell
@@ -416,6 +416,20 @@ class FDPlacement:
         elif (row_id > self.n_rows - 1):
             row_id = self.n_rows - 1
         self.objects[object_id].y = (row_id + 0.5) * self.grid_height
+
+    # Make sure all the clusters are placed within the canvas
+    def FitCanvas(self, object_id):
+        if (self.objects[object_id].x <= 0.0):
+            self.objects[object_id].x = 0.0
+
+        if (self.objects[object_id].x >= self.canvas_width):
+            self.objects[object_id].x = self.canvas_width
+
+        if (self.objects[object_id].y <= 0.0):
+            self.objects[object_id].y = 0.0
+
+        if (self.objects[object_id].y >= self.canvas_height):
+            self.objects[object_id].y = self.canvas_height
 
     # Force-directed Placement for standard-cell clusters
     def Placement(self):
@@ -501,8 +515,12 @@ class FDPlacement:
             for j in range(self.num_step):
                 print("Runing Step ", j)
                 self.Placement()
+            # Based on our understanding, the stdcell clusters can be placed
+            # at any place in the canvas instead of the center of gridcells
+            #for cluster in self.stdcell_clusters:
+            #    self.RoundCenter(cluster)
             for cluster in self.stdcell_clusters:
-                self.RoundCenter(cluster)
+                self.FitCanvas(cluster)
             self.WritePbNetlist(self.pb_netlist_file + "." + str(i + 1))
             self.WritePlcFile(self.plc_file + "." + str(i + 1))
         self.WritePbNetlist(self.pb_netlist_file + ".final")
