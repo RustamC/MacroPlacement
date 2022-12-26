@@ -1,5 +1,7 @@
 import os
 import sys
+import argparse
+import json
 from typing import Text
 sys.path.append('../../Plc_client')
 
@@ -60,121 +62,148 @@ class ProBufFormat2LefDef(PlacementCost):
         line += '}' + '\n'
 
         line += 'read_def ' + self.def_file + '\n'
-
-        line += 'set plc_macro_list {}' + '\n'
-        line += 'set plc_core_list {}' + '\n'
+        line += 'set plc_ports {}' + '\n'
+        line += 'set plc_cells {}' + '\n'
+        line += 'set plc_cells_pins {}' + '\n'
         
         # Here magic begins
+        # for mod_idx in sorted(self.hard_macro_indices + self.soft_macro_indices + self.port_indices):
         self.restore_placement(plc_pth=plc_file, ifInital=False, ifValidate=True, ifReadComment = False)
-        for mod_idx in sorted(self.hard_macro_indices + self.soft_macro_indices + self.port_indices):
-            # [node_index] [x] [y] [orientation] [fixed]
+
+        for mod_idx in sorted(self.hard_macro_indices + self.soft_macro_indices):
+            # [name] [x] [y] [orientation]
             mod = self.modules_w_pins[mod_idx]
+            mod_name = mod.get_name()
 
-            if mod.get_type() == "MACRO":
-                h = mod.get_height()
-                w = mod.get_width()
-                x, y = mod.get_pos()
+            h = mod.get_height()
+            w = mod.get_width()
+            x, y = mod.get_pos()
+            orient = mod.get_orientation()
 
-                x = x - w / 2
-                y = y - h / 2
-                orient = mod.get_orientation()
+            line += 'lappend plc_cells [dict create name "{}" x {:g} y {:g} orient "{}"]'.format(mod_name, x, y, orient) + '\n'
 
-                line += 'lappend plc_macro_list [dict create name "{}" x {:g} y {:g} orient "{}"]'.format(mod.get_name(), x, y, orient) + '\n'
+            # Hard macro
+            #if not self.is_node_soft_macro(mod_idx):
+            #    if mod_name in self.hard_macros_to_inpins.keys():
+            #        pin_names = self.hard_macros_to_inpins[mod_name]
+            #    else:
+            #        print("[ERROR UPDATE CONNECTION] MACRO pins not found")
+            #        continue
+            # Soft macro
+            #elif self.is_node_soft_macro(mod_idx):
+            #    if mod_name in self.soft_macros_to_inpins.keys():
+            #        pin_names = self.soft_macros_to_inpins[mod_name]
+            #    else:
+            #        print("[ERROR UPDATE CONNECTION] macro pins not found")
+            #        continue
+            
+            # [name] [x] [y] [x_offset] [y_offset]
+            #for pin_name in pin_names:
+            #    pin = self.modules_w_pins[self.mod_name_to_indices[pin_name]]
+            #    x, y = pin.get_pos()
+            #    x_offset, y_offset = pin.get_offset()
+            #
+            #    line += 'lappend plc_cells_pins [dict create name "{}" x "{}" y "{}" x_offset "{}" y_offset "{}"]'.format(pin_name, x, y, x_offset, y_offset) + '\n'
 
-                #print("MACRO: {} {:g} {:g} {} {}".format(
-                #    mod.get_name(),
-                #    x, y,
-                #    mod.get_orientation() if mod.get_orientation() else "-",
-                #    "FIXED" if mod.get_fix_flag() else "NONFIXED"
-                #))
-            elif mod.get_type() == "STDCELL":
+        #for mod_idx in sorted(self.port_indices):
+        #    # [name] [x] [y] [orientation] [side]
+        #    mod = self.modules_w_pins[mod_idx]
+        #
+        #    h = mod.get_height()
+        #    w = mod.get_width()
+        #    x, y = mod.get_pos()
+        #    orient = mod.get_orientation()
+        #    
+        #    side = mod.side
+        #    line += 'lappend plc_ports [dict create name "{}" x {:g} y {:g} orient "{}" side "{}"]'.format(mod.get_name(), x, y, orient, side) + '\n'
 
-                h = mod.get_height()
-                w = mod.get_width()
-                x, y = mod.get_pos()
-
-                x = x - w / 2
-                y = y - h / 2
-                orient = mod.get_orientation()
-                line += 'lappend plc_core_list [dict create name "{}" x {:g} y {:g} orient "{}"]'.format(mod.get_name(), x, y, orient) + '\n'
-
-                
-                #print("STDCELL: {} {:g} {:g} {} {}".format(
-                #    mod.get_name(),
-                #    x, y,
-                #    mod.get_orientation() if mod.get_orientation() else "-",
-                #    "FIXED" if mod.get_fix_flag() else "NONFIXED"
-                #))
         # Here magic ends
 
-        line += 'set db [::ord::get_db]' + '\n'
-        line += 'set dbu_per_uu [[$db getTech] getDbUnitsPerMicron]' + '\n'
-        line += 'set block [[$db getChip] getBlock]' + '\n'
-        line += 'set or_convertor [dict create N "R0" S "R180" W "R90" E "R270" FN "MY" FS "MX" FW "MX90" FE "MY90"]' + '\n'
+        line += 'source gen_def.tcl' + '\n'
+        line += 'gen_updated_def "" $plc_ports $plc_cells $plc_cells_pins' + '\n'
+        line += 'exit' + '\n'
 
-        line += 'puts "DBU: $dbu_per_uu"' + '\n'
-
-        line += 'foreach macro $plc_macro_list {' + '\n'
-        line +='    set macro_name [dict get $macro name]' + '\n'
-        line +='    set mx [expr int($dbu_per_uu * [dict get $macro x])]' + '\n'
-        line +='    set my [expr int($dbu_per_uu * [dict get $macro y])]' + '\n'
-        line +='    set morient [dict get $or_convertor [dict get $macro orient]]' + '\n'
-        line +='    set the_macro [$block findInst "$macro_name"]' + '\n'
-        line +='    if {$the_macro == "NULL"} {' + '\n'
-        line +='        puts stderr "$macro_name is not found in LEF/DEF database!"' + '\n'
-        line +='        exit 1' + '\n'
-        line +='    }' + '\n'
-        line +='    $the_macro setPlacementStatus PLACED' + '\n'
-        line +='    $the_macro setLocation $mx $my' + '\n'
-        line +='    $the_macro setLocationOrient $morient' + '\n'
-        line +='    $the_macro setPlacementStatus FIRM' + '\n'
-        line +='}' + '\n'
-
-        line += 'foreach core $plc_core_list {' + '\n'
-        line +='    set core_name [dict get $core name]' + '\n'
-        line +='    set mx [expr int($dbu_per_uu * [dict get $core x])]' + '\n'
-        line +='    set my [expr int($dbu_per_uu * [dict get $core y])]' + '\n'
-        line +='    set morient [dict get $or_convertor [dict get $core orient]]' + '\n'
-        line +='    set the_core [$block findInst "$core_name"]' + '\n'
-        line +='    if {$the_core == "NULL"} {' + '\n'
-        line +='        puts stderr "$core_name is not found in LEF/DEF database!"' + '\n'
-        line +='        exit 1' + '\n'
-        line +='    }' + '\n'
-        line +='    $the_core setPlacementStatus PLACED' + '\n'
-        line +='    $the_core setLocation $mx $my' + '\n'
-        line +='    $the_core setLocationOrient $morient' + '\n'
-        line +='    $the_core setPlacementStatus FIRM' + '\n'
-        line +='}' + '\n'
-
-        line += 'set def_outdir [file dirname ' + self.def_file + ']' + '\n'
-        line += 'set def_filename [file rootname [file tail ' + self.def_file + ']]' + '\n'
-        line += 'set def_file "$def_outdir/$def_filename.new.def"' + '\n'
-        line += 'write_def ' + '$def_file' + '\n'
-        line += 'exit\n'
-        f = open(file_name, 'w')
-        f.write(line)
-        f.close()
+        with open(file_name, 'w') as f: 
+            f.write(line)
+            f.close()
 
         cmd = self.openroad_exe + ' ' + file_name
         os.system(cmd)
 
-        cmd = "rm " + file_name
+        #cmd = "rm " + file_name
+        #os.system(cmd)
+
+class LefDef2ProBufFormat:
+
+    def __init__(self, lef_list, def_file, design, openroad_exe, net_size_threshold):
+        self.lef_list = lef_list
+        self.def_file = def_file
+        self.design = design
+        self.openroad_exe = openroad_exe
+        self.net_size_threshold = net_size_threshold
+
+    def convert_to_proto(self, pb_netlist):
+        file_name = 'to_proto.tcl'
+        line = ''
+        line += 'set ALL_LEFS "' + '\n'
+        for lef in self.lef_list:
+            line += '    ' + lef + '\n'
+        line += '"\n'
+
+        line += 'set site "unithd"' + '\n'
+
+        line += 'foreach lef_file ${ALL_LEFS} {' + '\n'
+        line += '    read_lef $lef_file' + '\n'
+        line += '}' + '\n'
+
+        line += 'read_def ' + self.def_file + '\n'
+        line += 'source gen_pb_or.tcl' + '\n'
+        line += 'gen_pb_netlist ' + pb_netlist + '\n'
+        line += 'exit'
+
+        with open(file_name, 'w') as f: 
+            f.write(line)
+            f.close()
+
+        cmd = self.openroad_exe + ' ' + file_name
         os.system(cmd)
 
 
-
 if __name__ == '__main__':
-    design = ""
-    lef_list = ["", ""]
-    def_file = ""
-    netlist = ""
-    lib_list = [""]
-    pb_file = ""
-    plc_file = ""
-    openroad_exe = "../utils/openroad"
+    parser = argparse.ArgumentParser(description="Protobuf to DEF convertor")
+    parser.add_argument('config', type=str)
     
-    tolerance = 0.05
-    halo_width = 0.05
+    args = vars(parser.parse_args())
 
-    convertor = ProBufFormat2LefDef(lef_list, def_file, design, netlist, lib_list, openroad_exe, pb_file, tolerance, halo_width)
-    convertor.convert_to_lefdef(plc_file)
+    with open(args['config'], 'r') as f:
+        data = json.load(f)
+
+    update_def = data['UPDATE_DEF']
+
+    if update_def == True:
+        design = data['DESIGN']
+        netlist = data['NETLIST']
+        def_file = data['DEF']
+        lef_list = data['LEFS']
+        lib_list = data['LIBS']
+        pb_file = data['PB_FILE']
+        plc_file = data['PLC_FILE']
+        openroad_exe = data['OPENROAD_EXE']
+    
+        tolerance = 0.05
+        halo_width = 0.05
+
+        convertor = ProBufFormat2LefDef(lef_list, def_file, design, netlist, lib_list, openroad_exe, pb_file, tolerance, halo_width)
+        convertor.convert_to_lefdef(plc_file)
+    else:
+        design = data['DESIGN']
+        def_file = data['DEF']
+        lef_list = data['LEFS']
+        pb_file = data['PB_FILE']
+        openroad_exe = data['OPENROAD_EXE']
+        net_size_threshold = 300
+
+        output_file = design + '.pb.txt'
+
+        convertor = LefDef2ProBufFormat(lef_list, def_file, design, openroad_exe, net_size_threshold)
+        convertor.convert_to_proto(pb_file)

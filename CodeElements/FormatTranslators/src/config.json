@@ -1,0 +1,12 @@
+{
+    "UPDATE_DEF": false,
+    "DESIGN": "test_macro",
+    "NETLIST": "../test/ProtocolBuffer2LefDef/design/test_macro.v",
+
+    "DEF": "../test/ProtocolBuffer2LefDef/design/test_macro.def",
+    "LEFS": ["../test/ProtocolBuffer2LefDef/lefs/merged.nom.lef"],
+    "LIBS": ["../test/ProtocolBuffer2LefDef/libs/resizer_sky130_fd_sc_hd__tt_025C_1v80.lib"],
+    "PB_FILE": "../test/ProtocolBuffer2LefDef/test_macro.pb.txt",
+    "PLC_FILE": "../test/ProtocolBuffer2LefDef/test_macro.plc",
+    "OPENROAD_EXE": "./utils/openroad"
+}
