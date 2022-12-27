@@ -103,15 +103,15 @@ proc find_bterm_side { pt_x pt_y dx dy} {
   set cond2 [expr ($pt_x/$dx) + ($pt_y/$dy) - 1]
   if { $cond1 > 0 } {
     if { $cond2 > 0 } {
-      return "right"
+      return "RIGHT"
     } else {
-      return "bottom"
+      return "BOTTOM"
     }
   } else {
     if { $cond2 > 0 } {
-      return "top"
+      return "TOP"
     } else {
-      return "left"
+      return "LEFT"
     }
   }
 }
@@ -150,7 +150,7 @@ proc write_node_port { port_ptr fp } {
   }
 
   ### Attribute: type ###
-  print_placeholder $fp "type" "port"
+  print_placeholder $fp "type" "PORT"
 
   ### Adjusting Core and Die ###
   set term_box [$port_ptr getBBox]
@@ -170,18 +170,18 @@ proc write_node_port { port_ptr fp } {
   set origin_x [ord::dbu_to_microns [[[ord::get_db_block] getCoreArea] xMin]]
   set origin_y [ord::dbu_to_microns [[[ord::get_db_block] getCoreArea] yMin]]
   ### Attribute: X ###
-  if {$side == "top" || $side == "bottom"} {
+  if {$side == "TOP" || $side == "BOTTOM"} {
     set X [expr $X - $origin_x]
-  } elseif { $side == "right" } {
+  } elseif { $side == "RIGHT" } {
     set X [expr $X - 2*$origin_x]
   }
   
   print_float $fp "x" $X
 
   ### Attribute: Y ###
-  if {$side == "left" || $side == "right"} {
+  if {$side == "LEFT" || $side == "RIGHT"} {
     set Y [expr $Y - $origin_y]
-  } elseif { $side == "top" } {
+  } elseif { $side == "TOP" } {
     set Y [expr $Y - 2*$origin_y]
   }
 
@@ -211,7 +211,7 @@ proc write_node_macro { macro_ptr fp } {
   print_float $fp "height" $height
 
   ### Attribute: type ###
-  print_placeholder $fp "type" "macro"
+  print_placeholder $fp "type" "MACRO"
 
   set inst_box [$macro_ptr getBBox]
   set pts [find_mid_point_bbox $inst_box]
@@ -256,7 +256,7 @@ proc write_node_macro_pin { macro_pin_ptr fp } {
   print_placeholder $fp "macro_name" $macro_name
 
   ### Attribute: type ###
-  print_placeholder $fp "type" "macro_pin"
+  print_placeholder $fp "type" "MACRO_PIN"
   
   set origin_x [ord::dbu_to_microns [[[ord::get_db_block] getCoreArea] xMin]]
   set origin_y [ord::dbu_to_microns [[[ord::get_db_block] getCoreArea] yMin]]
@@ -323,7 +323,7 @@ proc write_node_stdcell { inst_ptr fp } {
   print_float $fp "height" $height
 
   ### Attribute: type ###
-  print_placeholder $fp "type" "stdcell"
+  print_placeholder $fp "type" "STDCELL"
 
   set inst_box [$inst_ptr getBBox]
   set pts [find_mid_point_bbox $inst_box]
