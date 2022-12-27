@@ -303,7 +303,9 @@ proc write_node_stdcell { inst_ptr fp } {
   foreach iterm_ptr [${inst_ptr} getITerms] {
     if { [${iterm_ptr} isOutputSignal] } {
       set net_ptr [${iterm_ptr} getNet]
-      print_net $net_ptr $fp
+      if {$net_ptr != "NULL"} {
+        print_net $net_ptr $fp
+      }
     }
   }
 
