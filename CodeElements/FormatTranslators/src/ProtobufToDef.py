@@ -82,6 +82,8 @@ class ProBufFormat2LefDef(PlacementCost):
             h = mod.get_height()
             w = mod.get_width()
             x, y = mod.get_pos()
+            x = x - w / 2
+            y = y - h / 2
             orient = mod.get_orientation()
 
             line += 'lappend plc_cells [dict create name "{}" x {:g} y {:g} orient "{}"]'.format(mod_name, x, y, orient) + '\n'

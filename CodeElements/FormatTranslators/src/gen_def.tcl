@@ -45,37 +45,6 @@ proc get_orient { tmp_orient } {
   return $orient
 }
 
-#### Procedure to update Ports ####
-proc update_port {port_ptr} {
-  set origin_x [ord::dbu_to_microns [[[ord::get_db_block] getCoreArea] xMin]]
-  set origin_y [ord::dbu_to_microns [[[ord::get_db_block] getCoreArea] yMin]]
-
-  ### Attribute: name ###
-  set name [dict get $port_ptr name]
-
-  ### Attribute: Side ###
-  set dx [ord::dbu_to_microns [[[ord::get_db_block] getDieArea] dx]]
-  set dy [ord::dbu_to_microns [[[ord::get_db_block] getDieArea] dy]]
-  set die_llx [ord::dbu_to_microns [[[ord::get_db_block] getDieArea] xMin]]
-  set die_lly [ord::dbu_to_microns [[[ord::get_db_block] getDieArea] yMin]]
-  set side [find_bterm_side [expr $X - $die_llx] [expr $Y - $die_lly]\
-            $dx $dy] 
-
-  ### Attribute: X ###
-  if {$side == "top" || $side == "bottom"} {
-    set X [expr $X + $origin_x]
-  } elseif { $side == "right" } {
-    set X [expr $X + 2*$origin_x]
-  }
-
-  ### Attribute: Y ###
-  if {$side == "left" || $side == "right"} {
-    set Y [expr $Y + $origin_y]
-  } elseif { $side == "top" } {
-    set Y [expr $Y + 2*$origin_y]
-  }
-}
-
 #### Procedure to Update Macros ####
 proc update_macro {macro_ptr} {
   set origin_x [ord::dbu_to_microns [[[ord::get_db_block] getCoreArea] xMin]]
@@ -105,34 +74,6 @@ proc update_macro {macro_ptr} {
   $macro setLocation $x $y
   $macro setLocationOrient $orient
   $macro setPlacementStatus FIRM
-}
-
-#### Procedure to Update Macro Pins ####
-proc update_macro_pin {odb_macro_pin_ptr macro_pin_ptr} {
-  set origin_x [ord::dbu_to_microns [[[ord::get_db_block] getCoreArea] xMin]]
-  set origin_y [ord::dbu_to_microns [[[ord::get_db_block] getCoreArea] yMin]]
-
-  ### Attribute: name ###
-  set macro_ptr [ ${odb_macro_pin_ptr} getInst ]
-  set macro_name [ ${macro_ptr} getName ]
-
-  set macro_master [${macro_ptr} getMaster]
-  set cell_height [${macro_master} getHeight]
-  set cell_width [ ${macro_master} getWidth]
-  set mterm_ptr [${odb_macro_pin_ptr} getMTerm]
-  set pin_box [${mterm_ptr} getBBox]
-  set pts [find_mid_point $pin_box]
-  set x_offset [expr [dict get $macro_pin_ptr x] - $cell_width/2]
-  set y_offset [expr [dict get $macro_pin_ptr y] - $cell_height/2]
-
-  ### Attribute: X ###
-  set X [expr $X + $origin_x]
-  set X [ord::microns_to_dbu $X]
-  
-  ### Attribute: Y ###
-  set Y [expr $Y + $origin_y]
-  set Y [ord::microns_to_dbu $Y]
-  
 }
 
 #### Procedure to Update Std-cell ###
@@ -178,22 +119,10 @@ proc gen_updated_def { {file_name ""} {plc_ports {}} {plc_cells {}} {plc_cells_p
     set out_file "${design}.ct.def"
   }
 
-  #foreach port_ptr [$block getBTerms] {  
-  #  update_port [dict get $plc_ports [${port_ptr} getName]]
-  #}
-
   foreach inst_ptr [$block getInsts] {
     ### Macro ###
     if { [${inst_ptr} isBlock] } {
       update_macro [lsearch -index 1 -inline $plc_cells [${inst_ptr} getName]]
-      #foreach macro_pin_ptr [${inst_ptr} getITerms] {
-      #  if {[${macro_pin_ptr} isInputSignal] || [${macro_pin_ptr} isOutputSignal]} {
-      #    set macro_name [${inst_ptr} getName]
-      #    set pin_name [[${macro_pin_ptr} getMTerm] getName]
-      #    set macro_pin_name "${macro_name}\/${pin_name}"
-      #    update_macro_pin ${macro_pin_ptr} [dict get $plc_cells_pins $macro_pin_name]
-      #  }
-      #}
     } elseif { [${inst_ptr} isCore] } {
       ### Standard Cells ###
       update_stdcell [lsearch -index 1 -inline  $plc_cells [${inst_ptr} getName]]
