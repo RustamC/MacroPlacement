@@ -202,6 +202,8 @@ proc write_node_macro { macro_ptr fp } {
   set ref_name [$master_ptr getName]
   print_placeholder $fp "ref_name" ${ref_name}
 
+  set is_soft [string match [$master_ptr getType] "BLOCK_SOFT"]
+
   ### Attribute: Width ###
   set width [ord::dbu_to_microns [$master_ptr getWidth]]
   print_float $fp "width" $width
@@ -211,7 +213,11 @@ proc write_node_macro { macro_ptr fp } {
   print_float $fp "height" $height
 
   ### Attribute: type ###
-  print_placeholder $fp "type" "MACRO"
+  if {$is_soft == 0} {
+    print_placeholder $fp "type" "MACRO"
+  } else {
+    print_placeholder $fp "type" "macro"
+  }
 
   set inst_box [$macro_ptr getBBox]
   set pts [find_mid_point_bbox $inst_box]
@@ -255,9 +261,6 @@ proc write_node_macro_pin { macro_pin_ptr fp } {
   ### Attribute: Macro Name ###
   print_placeholder $fp "macro_name" $macro_name
 
-  ### Attribute: type ###
-  print_placeholder $fp "type" "MACRO_PIN"
-  
   set origin_x [ord::dbu_to_microns [[[ord::get_db_block] getCoreArea] xMin]]
   set origin_y [ord::dbu_to_microns [[[ord::get_db_block] getCoreArea] yMin]]
 
@@ -269,6 +272,15 @@ proc write_node_macro_pin { macro_pin_ptr fp } {
   set pts [find_mid_point $pin_box]
   set x_offset [expr [lindex $pts 0] - $cell_width/2]
   set y_offset [expr [lindex $pts 1] - $cell_height/2]
+  set is_soft [string match [$macro_master getType] "BLOCK_SOFT"]
+  
+  ### Attribute: type ###
+  if {$is_soft == 0} {
+    print_placeholder $fp "type" "MACRO_PIN"
+  } else {
+    print_placeholder $fp "type" "macro_pin"
+  }
+
   ### Attribute: x_offset ###
   set x_offset [ord::dbu_to_microns $x_offset]
   print_float $fp "x_offset" $x_offset
