@@ -73,6 +73,7 @@ proc update_macro {macro_ptr} {
   $macro setPlacementStatus PLACED
   $macro setLocation $x $y
   $macro setLocationOrient $orient
+  # element cannot be moved by a placer:
   $macro setPlacementStatus FIRM
 }
 
@@ -104,7 +105,7 @@ proc update_stdcell {inst_ptr} {
   $inst setPlacementStatus PLACED
   $inst setLocation $x $y
   $inst setLocationOrient $orient
-  $inst setPlacementStatus FIRM
+  $inst setPlacementStatus PLACED
 }
 
 #### Generate def format plc ####
@@ -121,11 +122,15 @@ proc gen_updated_def { {file_name ""} {plc_ports {}} {plc_cells {}} {plc_cells_p
 
   foreach inst_ptr [$block getInsts] {
     ### Macro ###
-    if { [${inst_ptr} isBlock] } {
-      update_macro [lsearch -index 1 -inline $plc_cells [${inst_ptr} getName]]
-    } elseif { [${inst_ptr} isCore] } {
-      ### Standard Cells ###
-      update_stdcell [lsearch -index 1 -inline  $plc_cells [${inst_ptr} getName]]
+    set the_inst [lsearch -index 1 -inline $plc_cells [${inst_ptr} getName]]
+    
+    if { $the_inst != "" } {
+      if { [${inst_ptr} isBlock] } {
+        update_macro $the_inst
+      } elseif { [${inst_ptr} isCore] } {
+        ### Standard Cells ###
+        update_stdcell $the_inst
+      }
     }
   }
 
