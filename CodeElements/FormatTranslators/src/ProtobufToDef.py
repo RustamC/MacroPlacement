@@ -33,9 +33,6 @@ class ProBufFormat2LefDef:
         self.plc_file = plc_file
         self.openroad_exe = openroad_exe
 
-        # net information
-        self.net_cnt = 0
-
         # All modules look-up table
         self.modules = []
         self.modules_w_pins = []
@@ -93,7 +90,7 @@ class ProBufFormat2LefDef:
         # node placement
         _node_plc = {}
 
-        for cnt, line in enumerate(open(self.plc_file, 'r')):
+        for _, line in enumerate(open(self.plc_file, 'r')):
             line_item = re.findall(r'[0-9A-Za-z\.\-]+', line)
 
             # skip empty lines
@@ -262,16 +259,6 @@ class ProBufFormat2LefDef:
         """
         try:
             return node_idx in self.soft_macro_indices
-        except IndexError:
-            print("[ERROR INDEX OUT OF RANGE] Can not process index at {}".format(node_idx))
-            exit(1)
-
-    def is_node_hard_macro(self, node_idx) -> bool:
-        """
-        Return if node is a hard macro
-        """
-        try:
-            return node_idx in self.hard_macro_indices
         except IndexError:
             print("[ERROR INDEX OUT OF RANGE] Can not process index at {}".format(node_idx))
             exit(1)
@@ -482,12 +469,6 @@ class ProBufFormat2LefDef:
 
                         # if pin has net info
                         if input_list:
-                            # net count should be factored by net weight
-                            if 'weight' in attr_dict.keys():
-                                self.net_cnt += 1 * \
-                                    float(attr_dict['weight'][1])
-                            else:
-                                self.net_cnt += 1
                             soft_macro_pin.add_sinks(input_list)
 
                         self.modules_w_pins.append(soft_macro_pin)
@@ -523,7 +504,7 @@ class ProBufFormat2LefDef:
                                                 height=attr_dict['height'][1],
                                                 x=attr_dict['x'][1], y=attr_dict['y'][1])
 
-                        self.modules.append(std_cell)
+                        self.modules_w_pins.append(std_cell)
                         # mapping node_name ==> node idx
                         self.mod_name_to_indices[node_name] = node_cnt-1
                         # mapping node idx ==> node_name
@@ -566,12 +547,6 @@ class ProBufFormat2LefDef:
 
                         # if pin has net info
                         if input_list:
-                            # net count should be factored by net weight
-                            if 'weight' in attr_dict.keys():
-                                self.net_cnt += 1 * \
-                                    float(attr_dict['weight'][1])
-                            else:
-                                self.net_cnt += 1
                             hard_macro_pin.add_sinks(input_list)
 
                         self.modules_w_pins.append(hard_macro_pin)
@@ -599,7 +574,6 @@ class ProBufFormat2LefDef:
 
                         # if pin has net info
                         if input_list:
-                            self.net_cnt += 1
                             port.add_sinks(input_list)
                             # ports does not have pins so update connection immediately
                             port.add_connections(input_list)
@@ -629,9 +603,7 @@ class ProBufFormat2LefDef:
             self.sink = {}  # standard cells, macro pins, ports driven by this cell
             self.connection = {}  # [module_name] => edge degree
             self.fix_flag = True
-            self.placement = 0  # needs to be updated
             self.orientation = None
-            self.ifPlaced = True
 
         def get_name(self):
             return self.name
@@ -674,9 +646,6 @@ class ProBufFormat2LefDef:
         def get_pos(self):
             return self.x, self.y
 
-        def set_side(self, side):
-            self.side = side
-
         def add_sink(self, sink_name):
             # NOTE: assume PORT names does not contain slash
             ifPORT = False
@@ -702,23 +671,11 @@ class ProBufFormat2LefDef:
         def get_sink(self):
             return self.sink
 
-        def get_connection(self):
-            return self.connection
-
         def get_type(self):
             return "PORT"
 
         def set_fix_flag(self, fix_flag):
             self.fix_flag = fix_flag
-
-        def get_fix_flag(self):
-            return self.fix_flag
-
-        def set_placed_flag(self, ifPlaced):
-            self.ifPlaced = ifPlaced
-
-        def get_placed_flag(self):
-            return self.ifPlaced
 
     class StdCell:
         def __init__(self, name, width, height, x=0.0, y=0.0):
@@ -730,8 +687,6 @@ class ProBufFormat2LefDef:
             self.connection = {}  # [module_name] => edge degree
             self.orientation = None
             self.fix_flag = False
-            self.ifPlaced = True
-            self.location = 0  # needs to be updated
 
         def get_name(self):
             return self.name
@@ -746,17 +701,11 @@ class ProBufFormat2LefDef:
         def get_type(self):
             return "MACRO"
 
-        def get_connection(self):
-            return self.connection
-
         def set_orientation(self, orientation):
             self.orientation = orientation
 
         def get_orientation(self):
             return self.orientation
-
-        def get_area(self):
-            return self.width * self.height
 
         def get_height(self):
             return self.height
@@ -764,29 +713,8 @@ class ProBufFormat2LefDef:
         def get_width(self):
             return self.width
 
-        def set_height(self, height):
-            self.height = height
-
-        def set_width(self, width):
-            self.width = width
-
-        def set_location(self, grid_cell_idx):
-            self.location = grid_cell_idx
-
-        def get_location(self):
-            return self.location
-
         def set_fix_flag(self, fix_flag):
             self.fix_flag = fix_flag
-
-        def get_fix_flag(self):
-            return self.fix_flag
-
-        def set_placed_flag(self, ifPlaced):
-            self.ifPlaced = ifPlaced
-
-        def get_placed_flag(self):
-            return self.ifPlaced
 
     class SoftMacro:
         def __init__(self, name, width, height, x=0.0, y=0.0):
@@ -798,8 +726,6 @@ class ProBufFormat2LefDef:
             self.connection = {}  # [module_name] => edge degree
             self.orientation = None
             self.fix_flag = False
-            self.ifPlaced = True
-            self.location = 0  # needs to be updated
 
         def get_name(self):
             return self.name
@@ -837,17 +763,11 @@ class ProBufFormat2LefDef:
         def get_type(self):
             return "MACRO"
 
-        def get_connection(self):
-            return self.connection
-
         def set_orientation(self, orientation):
             self.orientation = orientation
 
         def get_orientation(self):
             return self.orientation
-
-        def get_area(self):
-            return self.width * self.height
 
         def get_height(self):
             return self.height
@@ -855,29 +775,8 @@ class ProBufFormat2LefDef:
         def get_width(self):
             return self.width
 
-        def set_height(self, height):
-            self.height = height
-
-        def set_width(self, width):
-            self.width = width
-
-        def set_location(self, grid_cell_idx):
-            self.location = grid_cell_idx
-
-        def get_location(self):
-            return self.location
-
         def set_fix_flag(self, fix_flag):
             self.fix_flag = fix_flag
-
-        def get_fix_flag(self):
-            return self.fix_flag
-
-        def set_placed_flag(self, ifPlaced):
-            self.ifPlaced = ifPlaced
-
-        def get_placed_flag(self):
-            return self.ifPlaced
 
     class SoftMacroPin:
         def __init__(self, name, ref_id,
@@ -896,20 +795,11 @@ class ProBufFormat2LefDef:
         def set_weight(self, weight):
             self.weight = weight
 
-        def set_ref_id(self, ref_id):
-            self.ref_id = ref_id
-
-        def get_ref_id(self):
-            return self.ref_id
-
         def get_weight(self):
             return self.weight
 
         def get_name(self):
             return self.name
-
-        def get_macro_name(self):
-            return self.macro_name
 
         def set_pos(self, x, y):
             self.x = x
@@ -963,8 +853,6 @@ class ProBufFormat2LefDef:
             self.orientation = orientation
             self.connection = {}  # [module_name] => edge degree
             self.fix_flag = False
-            self.ifPlaced = True
-            self.location = 0  # needs to be updated
 
         def get_name(self):
             return self.name
@@ -992,9 +880,6 @@ class ProBufFormat2LefDef:
             for module_name in module_names:
                 self.add_connection(module_name, weight)
 
-        def get_connection(self):
-            return self.connection
-
         def set_pos(self, x, y):
             self.x = x
             self.y = y
@@ -1011,32 +896,14 @@ class ProBufFormat2LefDef:
         def get_type(self):
             return "MACRO"
 
-        def get_area(self):
-            return self.width * self.height
-
         def get_height(self):
             return self.height
 
         def get_width(self):
             return self.width
 
-        def set_location(self, grid_cell_idx):
-            self.location = grid_cell_idx
-
-        def get_location(self):
-            return self.location
-
         def set_fix_flag(self, fix_flag):
             self.fix_flag = fix_flag
-
-        def get_fix_flag(self):
-            return self.fix_flag
-
-        def set_placed_flag(self, ifPlaced):
-            self.ifPlaced = ifPlaced
-
-        def get_placed_flag(self):
-            return self.ifPlaced
 
     class HardMacroPin:
         def __init__(self, name, ref_id,
@@ -1052,13 +919,6 @@ class ProBufFormat2LefDef:
             self.macro_name = macro_name
             self.weight = weight
             self.sink = {}
-            self.ifPlaced = True
-
-        def set_ref_id(self, ref_id):
-            self.ref_id = ref_id
-
-        def get_ref_id(self):
-            return self.ref_id
 
         def set_weight(self, weight):
             self.weight = weight
@@ -1082,9 +942,6 @@ class ProBufFormat2LefDef:
 
         def get_name(self):
             return self.name
-
-        def get_macro_name(self):
-            return self.macro_name
 
         def add_sink(self, sink_name):
             # NOTE: assume PORT names does not contain slash
@@ -1187,7 +1044,7 @@ class ProBufFormat2LefDef:
 
         # Here magic begins
         # for mod_idx in sorted(self.hard_macro_indices + self.soft_macro_indices + self.port_indices):
-        for mod_idx in sorted(self.hard_macro_indices + self.soft_macro_indices):
+        for mod_idx in sorted(self.hard_macro_indices + self.soft_macro_indices + self.std_cell_indices):
             # [name] [x] [y] [orientation]
             mod = self.modules_w_pins[mod_idx]
             mod_name = mod.get_name()
