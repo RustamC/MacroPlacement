@@ -70,7 +70,6 @@ proc update_macro {macro_ptr} {
   ### Attribute: Orient ###
   set orient [get_orient [dict get $macro_ptr orient]]
 
-  $macro setPlacementStatus PLACED
   $macro setLocation $x $y
   $macro setLocationOrient $orient
   # element cannot be moved by a placer:
@@ -102,10 +101,9 @@ proc update_stdcell {inst_ptr} {
   ### Attribute: Orient ###
   set orient [get_orient [dict get $inst_ptr orient]]
 
-  $inst setPlacementStatus PLACED
+  #$inst setPlacementStatus PLACED
   $inst setLocation $x $y
   $inst setLocationOrient $orient
-  $inst setPlacementStatus PLACED
 }
 
 #### Generate def format plc ####
