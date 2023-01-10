@@ -1,5 +1,5 @@
 {
-    "PROTO_TO_DEF": false,
+    "CONVERTOR": "d2p",
     "DESIGN": "test_macro",
     "NETLIST": "../test/ProtocolBufferFormat2Def/design/test_macro_mixed.v",
 

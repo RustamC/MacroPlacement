@@ -8,30 +8,16 @@ from pathlib import Path
 from typing import Text
 from absl import logging
 
+class LoadProBuf:
 
-class ProBufFormat2LefDef:
-
-    # design, lef_list, def_file, lib_list, netlist, pb_file, plc_file, openroad_exe, tolerance, halo_width
     def __init__(self,
-                 design: Text,
-                 lef_list,
-                 def_file: Text,
-                 lib_list,
-                 netlist: Text,
                  pb_file: Text,
-                 plc_file: Text,
-                 openroad_exe: Text) -> None:
+                 plc_file: Text) -> None:
         """
         Creates a ProBufFormat2LefDef object.
         """
-        self.design = design
-        self.lef_list = lef_list
-        self.def_file = def_file
-        self.lib_list = lib_list
-        self.netlist = netlist
         self.pb_file = pb_file
         self.plc_file = plc_file
-        self.openroad_exe = openroad_exe
 
         # All modules look-up table
         self.modules = []
@@ -1011,7 +997,26 @@ class ProBufFormat2LefDef:
                 except IndexError as e:
                     print('[ERROR PC PARSER] %s' % str(e))
 
-    def convert_to_lefdef(self):
+
+class ProBufFormat2LefDef(LoadProBuf):
+    def __init__(self,
+                 design: Text,
+                 lef_list,
+                 def_file: Text,
+                 lib_list,
+                 netlist: Text,
+                 pb_file: Text,
+                 plc_file: Text,
+                 openroad_exe: Text) -> None:
+        super().__init__(pb_file, plc_file)
+        self.design = design
+        self.lef_list = lef_list
+        self.def_file = def_file
+        self.lib_list = lib_list
+        self.netlist = netlist
+        self.openroad_exe = openroad_exe
+    
+    def convert(self):
         file_name = 'tmp_update_def.tcl'
         line = 'set top_design ' + self.design + '\n'
         line += 'set netlist ' + self.netlist + '\n'
@@ -1027,6 +1032,7 @@ class ProBufFormat2LefDef:
             line += '    ' + lib + '\n'
         line += '"\n'
 
+        # TODO: Set site name as param for __init__
         line += 'set site "unithd"' + '\n'
 
         line += 'foreach lef_file ${ALL_LEFS} {' + '\n'
@@ -1094,7 +1100,7 @@ class LefDef2ProBufFormat:
         self.openroad_exe = openroad_exe
         self.net_size_threshold = net_size_threshold
 
-    def convert_to_proto(self):
+    def convert(self):
         file_name = 'tmp_to_proto.tcl'
         line = ''
         line += 'set ALL_LEFS "' + '\n'
@@ -1125,6 +1131,86 @@ class LefDef2ProBufFormat:
         cmd = "rm " + file_name
         os.system(cmd)
 
+class ProBufFormat2MacroCfg(LoadProBuf):
+    
+    def __init__(self,
+                 design: Text,
+                 lef_list,
+                 def_file: Text,
+                 lib_list,
+                 netlist: Text,
+                 pb_file: Text,
+                 plc_file: Text,
+                 macrocfg_file: Text,
+                 openroad_exe: Text) -> None:
+        super().__init__(pb_file, plc_file)
+        self.design = design
+        self.lef_list = lef_list
+        self.def_file = def_file
+        self.lib_list = lib_list
+        self.netlist = netlist
+        self.macrocfg_file = macrocfg_file
+        self.openroad_exe = openroad_exe
+
+    def convert(self):
+        file_name = 'tmp_gen_macrocfg.tcl'
+        line = 'set top_design ' + self.design + '\n'
+        line += 'set netlist ' + self.netlist + '\n'
+        line += 'set def_file ' + self.def_file + '\n'
+
+        line += 'set ALL_LEFS "' + '\n'
+        for lef in self.lef_list:
+            line += '    ' + lef + '\n'
+        line += '"\n'
+
+        line += 'set LIB_BC "' + '\n'
+        for lib in self.lib_list:
+            line += '    ' + lib + '\n'
+        line += '"\n'
+
+        # TODO: Set site name as param for __init__
+        line += 'set site "unithd"' + '\n'
+
+        line += 'foreach lef_file ${ALL_LEFS} {' + '\n'
+        line += '    read_lef $lef_file' + '\n'
+        line += '}' + '\n'
+
+        line += 'foreach lib_file ${LIB_BC} {' + '\n'
+        line += '    read_liberty $lib_file' + '\n'
+        line += '}' + '\n'
+
+        line += 'read_def ' + self.def_file + '\n'
+        line += 'set plc_cells {}' + '\n'
+
+        for mod_idx in sorted(self.hard_macro_indices):
+                # [name] [x] [y] [orientation]
+                mod = self.modules_w_pins[mod_idx]
+                mod_name = mod.get_name()
+
+                h = mod.get_height()
+                w = mod.get_width()
+                x, y = mod.get_pos()
+                x = x - w / 2
+                y = y - h / 2
+                orient = mod.get_orientation()
+
+                line += 'lappend plc_cells [dict create name "{}" x {:g} y {:g} orient "{}"]'.format(
+                mod_name, x, y, orient) + '\n'
+        
+        line += 'source gen_macrocfg.tcl' + '\n'
+        line += 'gen_macrocfg ' + self.macrocfg_file + \
+            ' $plc_cells' + '\n'
+        line += 'exit' + '\n'
+
+        with open(file_name, 'w') as f:
+            f.write(line)
+            f.close()
+
+        cmd = self.openroad_exe + ' ' + file_name
+        os.system(cmd)
+
+        cmd = "rm " + file_name
+        os.system(cmd)
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(description="Protobuf to DEF convertor")
@@ -1135,30 +1221,35 @@ if __name__ == '__main__':
     with open(args['config'], 'r') as f:
         data = json.load(f)
 
-    update_def = data['PROTO_TO_DEF']
+    convertor_types = ["p2d", "d2p", "p2m"]
+    conv_t = data['CONVERTOR']
 
-    if update_def == True:
-        design = data['DESIGN']
-        netlist = data['NETLIST']
-        def_file = data['DEF']
-        lef_list = data['LEFS']
-        lib_list = data['LIBS']
-        pb_file = data['PB_FILE']
-        plc_file = data['PLC_FILE']
-        openroad_exe = data['OPENROAD_EXE']
+    if conv_t not in convertor_types:
+        print("Unknown convertor: {}!".format(conv_t))
+        exit(1)
 
+    design = data['DESIGN']
+    netlist = data['NETLIST']
+    def_file = data['DEF']
+    lef_list = data['LEFS']
+    lib_list = data['LIBS']
+    pb_file = data['PB_FILE']
+    plc_file = data['PLC_FILE']
+    openroad_exe = data['OPENROAD_EXE']
+
+    if conv_t == "p2d":
         convertor = ProBufFormat2LefDef(
             design, lef_list, def_file, lib_list, netlist, pb_file, plc_file, openroad_exe)
-        convertor.convert_to_lefdef()
-    else:
-        design = data['DESIGN']
-        def_file = data['DEF']
-        lef_list = data['LEFS']
-        pb_file = data['PB_FILE']
-        plc_file = data['PLC_FILE']
-        openroad_exe = data['OPENROAD_EXE']
+        convertor.convert()
+    elif conv_t == "d2p":
         net_size_threshold = 300
 
         convertor = LefDef2ProBufFormat(
             design, lef_list, def_file, pb_file, plc_file, openroad_exe, net_size_threshold)
-        convertor.convert_to_proto()
+        convertor.convert()
+    elif conv_t == "p2m":
+        macrocfg = data['MACRO_CFG']
+
+        convertor = ProBufFormat2MacroCfg(
+            design, lef_list, def_file, lib_list, netlist, pb_file, plc_file, macrocfg, openroad_exe)
+        convertor.convert()

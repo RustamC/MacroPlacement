@@ -1,5 +1,5 @@
 {
-    "CONVERTOR": "p2d",
+    "CONVERTOR": "p2m",
     "DESIGN": "test_macro",
     "NETLIST": "../test/ProtocolBufferFormat2Def/design/test_macro_mixed.v",
 
@@ -8,5 +8,7 @@
     "LIBS": ["../test/ProtocolBufferFormat2Def/libs/resizer_sky130_fd_sc_hd__tt_025C_1v80.lib"],
     "PB_FILE": "../test/ProtocolBufferFormat2Def/test_macro_mixed.pb.txt",
     "PLC_FILE": "../test/ProtocolBufferFormat2Def/test_macro_mixed.plc",
-    "OPENROAD_EXE": "./utils/openroad"
+    "OPENROAD_EXE": "./utils/openroad",
+
+    "MACRO_CFG": "../test/ProtocolBufferFormat2Def/test_macro_mixed.cfg"
 }
